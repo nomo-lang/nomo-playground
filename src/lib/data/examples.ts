@@ -1,3 +1,4 @@
+// Curated examples are framework-neutral and mirror compiler fixtures.
 export type ExampleId = "hello" | "arithmetic" | "struct-methods" | "array";
 
 export type Example = {
@@ -112,4 +113,3 @@ export const defaultExample = examples[0];
 export function findExample(id: string | undefined) {
   return examples.find((example) => example.id === id);
 }
-

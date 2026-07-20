@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defaultExample, examples } from "../data/examples";
+import { defaultExample, examples } from "./data/examples";
 import {
   analyze,
   createShareUrl,
@@ -99,4 +99,3 @@ describe("share links", () => {
     expect(shared).toContain("/nomo-playground/?code=");
   });
 });
-
