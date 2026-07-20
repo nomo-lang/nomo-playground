@@ -1,4 +1,4 @@
-import { examples, type Example } from "../data/examples";
+import { examples, type Example } from "./data/examples";
 
 export type DiagnosticSeverity = "error" | "warning";
 
@@ -333,4 +333,3 @@ export function createShareUrl(base: string, source: string) {
   url.searchParams.set("code", encodeSource(source));
   return url.toString();
 }
-

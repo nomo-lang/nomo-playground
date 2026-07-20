@@ -31,7 +31,8 @@ Merges to `main` deploy through GitHub Actions to:
 
 <https://nomo-lang.github.io/nomo-playground/>
 
-The Pages build uses `/nomo-playground/` as its Vite base path.
+The SvelteKit static build preserves `/nomo-playground/` as the Pages base
+path.
 
 ## Browser execution model
 
