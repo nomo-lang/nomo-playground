@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { page } from "$app/state";
   import { onMount } from "svelte";
 
   import Editor from "$lib/components/Editor.svelte";
@@ -9,7 +8,8 @@
     findExample,
     type ExampleId,
   } from "$lib/data/examples";
-  import { localeHref, messages, toLocale } from "$lib/i18n";
+  import { getPlaygroundCopy } from "$lib/copy";
+  import { getLocale, localizeHref } from "$lib/paraglide/runtime";
   import {
     analyze,
     createShareUrl,
@@ -22,24 +22,18 @@
   type Panel = "output" | "problems";
   const newline = "\n";
 
-  let locale = $derived(toLocale(page.params.lang));
-  let copy = $derived(messages[locale]);
-  let switchHref = $state(localeHref(targetLocale()));
+  let locale = $derived(getLocale());
+  let copy = $derived(getPlaygroundCopy(locale));
+  let switchHref = $state(localizeHref("/", { locale: targetLocale() }));
 
   let source = $state(defaultExample.source);
   let selectedId = $state<ExampleId>(defaultExample.id);
   let panel = $state<Panel>("output");
   let runResult = $state<RunResult>(
-    runPreview(
-      defaultExample.source,
-      defaultExample,
-      toLocale(page.params.lang),
-    ),
+    runPreview(defaultExample.source, defaultExample, getLocale()),
   );
   let cursor = $state({ line: 1, column: 1 });
-  let notice = $state<string>(
-    messages[toLocale(page.params.lang)].notices.ready,
-  );
+  let notice = $state<string>(getPlaygroundCopy(getLocale()).notices.ready);
 
   let selectedExample = $derived(findExample(selectedId) ?? defaultExample);
   let selectedExampleCopy = $derived(copy.examples[selectedExample.id]);
@@ -50,12 +44,14 @@
   let isEdited = $derived(source !== selectedExample.source);
 
   onMount(() => {
-    switchHref = localeHref(targetLocale(), window.location.search);
+    switchHref = localizeHref(`/${window.location.search}`, {
+      locale: targetLocale(),
+    });
     loadSharedSource();
   });
 
   function targetLocale() {
-    return toLocale(page.params.lang) === "en" ? "zh" : "en";
+    return locale === "en" ? "zh" : "en";
   }
 
   function loadSharedSource() {
@@ -161,10 +157,7 @@
   <a class="skip-link" href="#editor">{copy.skip}</a>
 
   <header class="topbar">
-    <a
-      class="wordmark"
-      href="https://nomo-lang.github.io/www.nomo-lang.org/"
-    >
+    <a class="wordmark" href="https://www.nomo-lang.org/">
       <span aria-hidden="true">N</span>
       Nomo
     </a>
@@ -173,7 +166,9 @@
       <span>{copy.browserPreview}</span>
     </div>
     <nav aria-label={copy.navLabel}>
-      <a href="https://github.com/nomo-lang/nomo/tree/main/docs">
+      <a
+        href={`https://www.nomo-lang.org${locale === "zh" ? "/zh" : ""}/docs/`}
+      >
         {copy.nav[0]}
       </a>
       <a href="https://github.com/nomo-lang/nomo-playground">

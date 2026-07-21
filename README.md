@@ -53,6 +53,10 @@ For Cloudflare Git integration, use `pnpm run build` as the build command and
 English is served at `/` and Simplified Chinese at `/zh/`. The interface,
 examples, diagnostics, runner notices, and document metadata are localized.
 Share links retain their `code` query parameter when switching languages.
+Internationalization uses the official Svelte Paraglide add-on, with source
+messages in `messages/en.json` and `messages/zh.json` and locale settings in
+`project.inlang/settings.json`. The generated type-safe runtime under
+`src/lib/paraglide` is not committed.
 
 ## Browser execution model
 

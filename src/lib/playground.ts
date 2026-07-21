@@ -1,5 +1,6 @@
 import { examples, type Example } from "./data/examples";
-import { defaultLocale, messages, type Locale } from "./i18n";
+import { getPlaygroundCopy } from "./copy";
+import { baseLocale, type Locale } from "./paraglide/runtime";
 
 export type DiagnosticSeverity = "error" | "warning";
 
@@ -35,7 +36,7 @@ function normalize(source: string) {
 }
 
 function structuralDiagnostics(source: string, locale: Locale): Diagnostic[] {
-  const copy = messages[locale].diagnostics;
+  const copy = getPlaygroundCopy(locale).diagnostics;
   const diagnostics: Diagnostic[] = [];
   const stack: Bracket[] = [];
   let line = 1;
@@ -130,9 +131,9 @@ function structuralDiagnostics(source: string, locale: Locale): Diagnostic[] {
 
 export function analyze(
   source: string,
-  locale: Locale = defaultLocale,
+  locale: Locale = baseLocale,
 ): Diagnostic[] {
-  const copy = messages[locale].diagnostics;
+  const copy = getPlaygroundCopy(locale).diagnostics;
   const diagnostics = structuralDiagnostics(source, locale);
   const lines = source.replaceAll("\r\n", "\n").split("\n");
   const firstCodeLine = lines.findIndex((line) => {
@@ -259,9 +260,9 @@ function selectedFixture(source: string, selected: Example | undefined) {
 export function runPreview(
   source: string,
   selected?: Example,
-  locale: Locale = defaultLocale,
+  locale: Locale = baseLocale,
 ): RunResult {
-  const copy = messages[locale];
+  const copy = getPlaygroundCopy(locale);
   const errors = analyze(source, locale).filter(
     (diagnostic) => diagnostic.severity === "error",
   );
