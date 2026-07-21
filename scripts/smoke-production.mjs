@@ -24,7 +24,8 @@ if (!icon.ok || !icon.headers.get("content-type")?.includes("image/svg+xml")) {
   throw new Error(`favicon failed: ${icon.status}`);
 }
 
-const missing = await fetch(new URL("/__nomo_release_smoke_missing__", base));
+const missingPath = `/__nomo_release_smoke_missing_${Date.now()}__`;
+const missing = await fetch(new URL(missingPath, base));
 const missingBody = await missing.text();
 if (missing.status !== 404 || !missingBody.includes("Route not found")) {
   throw new Error(`localized 404 failed: ${missing.status}`);
