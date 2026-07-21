@@ -37,6 +37,11 @@ describe("browser analyzer", () => {
     expect(diagnostics.map(({ code }) => code)).toContain("NOMO-P101");
     expect(diagnostics.map(({ code }) => code)).toContain("NOMO-P102");
   });
+
+  it("localizes diagnostics", () => {
+    const diagnostics = analyze("fn helper() -> void {}\n", "zh");
+    expect(diagnostics[0]?.message).toContain("package 声明");
+  });
 });
 
 describe("formatter", () => {
@@ -78,6 +83,12 @@ describe("preview runner", () => {
     expect(runPreview("package app.main")).toMatchObject({
       status: "error",
     });
+  });
+
+  it("localizes runner messages", () => {
+    expect(runPreview("package app.main", undefined, "zh").note).toContain(
+      "修复结构错误",
+    );
   });
 });
 

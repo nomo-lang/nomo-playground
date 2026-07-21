@@ -160,6 +160,10 @@ a {
   color: var(--ink);
 }
 
+.topbar nav .locale-link {
+  color: var(--blue-light);
+}
+
 .topbar nav .install-link {
   display: inline-flex;
   min-height: 36px;
@@ -943,8 +947,13 @@ a {
     gap: 0;
   }
 
-  .topbar nav > a:not(.install-link) {
+  .topbar nav > a:not(.install-link):not(.locale-link) {
     display: none;
+  }
+
+  .topbar nav .locale-link {
+    padding: 8px;
+    font-size: 8px;
   }
 
   .topbar nav .install-link {

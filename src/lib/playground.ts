@@ -1,4 +1,6 @@
 import { examples, type Example } from "./data/examples";
+import { getPlaygroundCopy } from "./copy";
+import { baseLocale, type Locale } from "./paraglide/runtime";
 
 export type DiagnosticSeverity = "error" | "warning";
 
@@ -33,7 +35,8 @@ function normalize(source: string) {
   return source.replaceAll("\r\n", "\n").trim();
 }
 
-function structuralDiagnostics(source: string): Diagnostic[] {
+function structuralDiagnostics(source: string, locale: Locale): Diagnostic[] {
+  const copy = getPlaygroundCopy(locale).diagnostics;
   const diagnostics: Diagnostic[] = [];
   const stack: Bracket[] = [];
   let line = 1;
@@ -98,7 +101,7 @@ function structuralDiagnostics(source: string): Diagnostic[] {
         severity: "error",
         line,
         column,
-        message: `Unexpected closing '${character}'.`,
+        message: copy.unexpectedClosing(character),
       });
     }
   }
@@ -109,7 +112,7 @@ function structuralDiagnostics(source: string): Diagnostic[] {
       severity: "error",
       line: stringStart.line,
       column: stringStart.column,
-      message: "String literal is not closed.",
+      message: copy.unclosedString,
     });
   }
 
@@ -119,15 +122,19 @@ function structuralDiagnostics(source: string): Diagnostic[] {
       severity: "error",
       line: opening.line,
       column: opening.column,
-      message: `Opening '${opening.char}' has no matching close.`,
+      message: copy.unmatchedOpening(opening.char),
     });
   }
 
   return diagnostics;
 }
 
-export function analyze(source: string): Diagnostic[] {
-  const diagnostics = structuralDiagnostics(source);
+export function analyze(
+  source: string,
+  locale: Locale = baseLocale,
+): Diagnostic[] {
+  const copy = getPlaygroundCopy(locale).diagnostics;
+  const diagnostics = structuralDiagnostics(source, locale);
   const lines = source.replaceAll("\r\n", "\n").split("\n");
   const firstCodeLine = lines.findIndex((line) => {
     const trimmed = line.trim();
@@ -143,7 +150,7 @@ export function analyze(source: string): Diagnostic[] {
       severity: "error",
       line: Math.max(firstCodeLine + 1, 1),
       column: 1,
-      message: "A Nomo file starts with a package declaration.",
+      message: copy.package,
     });
   }
 
@@ -153,7 +160,7 @@ export function analyze(source: string): Diagnostic[] {
       severity: "error",
       line: 1,
       column: 1,
-      message: "This runnable example needs fn main() with a return type.",
+      message: copy.main,
     });
   }
 
@@ -168,7 +175,7 @@ export function analyze(source: string): Diagnostic[] {
           severity: "warning",
           line: index + 1,
           column: 1,
-          message: `Duplicate import '${importName}' (first imported on line ${firstLine}).`,
+          message: copy.duplicateImport(importName, firstLine),
         });
       } else {
         imports.set(importName, index + 1);
@@ -181,7 +188,7 @@ export function analyze(source: string): Diagnostic[] {
         severity: "warning",
         line: index + 1,
         column: lineText.lastIndexOf(";") + 1,
-        message: "Nomo statements do not require semicolons.",
+        message: copy.semicolon,
       });
     }
   });
@@ -253,15 +260,17 @@ function selectedFixture(source: string, selected: Example | undefined) {
 export function runPreview(
   source: string,
   selected?: Example,
+  locale: Locale = baseLocale,
 ): RunResult {
-  const errors = analyze(source).filter(
+  const copy = getPlaygroundCopy(locale);
+  const errors = analyze(source, locale).filter(
     (diagnostic) => diagnostic.severity === "error",
   );
   if (errors.length > 0) {
     return {
       status: "error",
-      output: `${errors.length} error${errors.length === 1 ? "" : "s"} — run Check for details.`,
-      note: "Execution is blocked until structural errors are fixed.",
+      output: copy.run.blockedOutput(errors.length),
+      note: copy.run.blockedNote,
     };
   }
 
@@ -270,7 +279,7 @@ export function runPreview(
     return {
       status: "success",
       output: fixture.output,
-      note: `Curated browser fixture · ${fixture.title}`,
+      note: copy.run.fixture(copy.examples[fixture.id].title),
     };
   }
 
@@ -289,14 +298,14 @@ export function runPreview(
     return {
       status: "preview",
       output: literals.join("\n"),
-      note: "Local literal-output preview · not the native Nomo compiler",
+      note: copy.run.literalNote,
     };
   }
 
   return {
     status: "preview",
-    output: "No browser-runnable literal output found.",
-    note: "Use the Nomo CLI to compile and run arbitrary source.",
+    output: copy.run.noOutput,
+    note: copy.run.cliNote,
   };
 }
 

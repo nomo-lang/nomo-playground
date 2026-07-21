@@ -10,29 +10,53 @@ Arbitrary programs still need the
 
 ## Local development
 
-Requires Node.js 24 and npm.
+Requires Node.js 24 and pnpm 11.
 
 ```sh
-npm install
-npm run dev
+pnpm install
+pnpm run dev
 ```
 
 Run all validation before opening a pull request:
 
 ```sh
-npm run lint
-npm test
-npm run build
+pnpm run lint
+pnpm test
+pnpm run build
+pnpm run check:cloudflare
 ```
 
 ## Deployment
 
-Merges to `main` deploy through GitHub Actions to:
+The production target is Cloudflare Workers Static Assets. The checked-in
+`wrangler.jsonc` deploys the SvelteKit worker and its prerendered assets as one
+unit.
 
-<https://nomo-lang.github.io/nomo-playground/>
+To test the production runtime locally:
 
-The SvelteKit static build preserves `/nomo-playground/` as the Pages base
-path.
+```sh
+pnpm run preview
+```
+
+After authenticating Wrangler with the target Cloudflare account, deploy with:
+
+```sh
+pnpm run deploy
+```
+
+For Cloudflare Git integration, use `pnpm run build` as the build command and
+`pnpm exec wrangler deploy` as the deploy command. The generated output lives in
+`.svelte-kit/cloudflare` and is served from the domain root.
+
+## Internationalization
+
+English is served at `/` and Simplified Chinese at `/zh/`. The interface,
+examples, diagnostics, runner notices, and document metadata are localized.
+Share links retain their `code` query parameter when switching languages.
+Internationalization uses the official Svelte Paraglide add-on, with source
+messages in `messages/en.json` and `messages/zh.json` and locale settings in
+`project.inlang/settings.json`. The generated type-safe runtime under
+`src/lib/paraglide` is not committed.
 
 ## Browser execution model
 
