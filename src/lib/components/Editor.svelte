@@ -1,6 +1,7 @@
 <script lang="ts">
   type Props = {
     source: string;
+    label: string;
     onsourcechange: (source: string) => void;
     oncursorchange: (line: number, column: number) => void;
   };
@@ -14,7 +15,7 @@
     /("(?:\\.|[^"\\])*"|\/\/.*$|\b(?:package|import|fn|let|mut|return|struct|impl|pub|match|if|else|for|break|defer)\b|\b(?:void|string|i64|i32|bool|Result|Option|Array)\b|\b(?:Ok|Err|Some|None)\b|\b\d+\b)/g;
   const newline = "\n";
 
-  let { source, onsourcechange, oncursorchange }: Props = $props();
+  let { source, label, onsourcechange, oncursorchange }: Props = $props();
   let textarea: HTMLTextAreaElement;
   let highlight: HTMLDivElement;
 
@@ -93,7 +94,7 @@
       <pre class="syntax-layer" aria-hidden="true">{#each highlightedLines as line, index (index)}{#each line as part, partIndex (partIndex)}<span class={part.className}>{part.text}</span>{/each}{#if index < highlightedLines.length - 1}{newline}{/if}{/each}</pre>
     </div>
     <textarea
-      aria-label="Nomo source editor"
+      aria-label={label}
       autocapitalize="off"
       autocomplete="off"
       onclick={reportCursor}

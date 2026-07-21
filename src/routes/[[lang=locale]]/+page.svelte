@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from "$app/state";
   import { onMount } from "svelte";
 
   import Editor from "$lib/components/Editor.svelte";
@@ -8,6 +9,7 @@
     findExample,
     type ExampleId,
   } from "$lib/data/examples";
+  import { localeHref, messages, toLocale } from "$lib/i18n";
   import {
     analyze,
     createShareUrl,
@@ -20,23 +22,41 @@
   type Panel = "output" | "problems";
   const newline = "\n";
 
+  let locale = $derived(toLocale(page.params.lang));
+  let copy = $derived(messages[locale]);
+  let switchHref = $state(localeHref(targetLocale()));
+
   let source = $state(defaultExample.source);
   let selectedId = $state<ExampleId>(defaultExample.id);
   let panel = $state<Panel>("output");
   let runResult = $state<RunResult>(
-    runPreview(defaultExample.source, defaultExample),
+    runPreview(
+      defaultExample.source,
+      defaultExample,
+      toLocale(page.params.lang),
+    ),
   );
   let cursor = $state({ line: 1, column: 1 });
-  let notice = $state("Ready");
+  let notice = $state<string>(
+    messages[toLocale(page.params.lang)].notices.ready,
+  );
 
   let selectedExample = $derived(findExample(selectedId) ?? defaultExample);
-  let diagnostics = $derived(analyze(source));
+  let selectedExampleCopy = $derived(copy.examples[selectedExample.id]);
+  let diagnostics = $derived(analyze(source, locale));
   let errors = $derived(
     diagnostics.filter((diagnostic) => diagnostic.severity === "error"),
   );
   let isEdited = $derived(source !== selectedExample.source);
 
-  onMount(loadSharedSource);
+  onMount(() => {
+    switchHref = localeHref(targetLocale(), window.location.search);
+    loadSharedSource();
+  });
+
+  function targetLocale() {
+    return toLocale(page.params.lang) === "en" ? "zh" : "en";
+  }
 
   function loadSharedSource() {
     const encoded = new URLSearchParams(window.location.search).get("code");
@@ -44,8 +64,8 @@
     if (!sharedSource) return;
 
     source = sharedSource;
-    runResult = runPreview(sharedSource);
-    notice = "Loaded shared source";
+    runResult = runPreview(sharedSource, undefined, locale);
+    notice = copy.notices.shared;
   }
 
   async function copyText(value: string) {
@@ -66,7 +86,7 @@
 
   function updateSource(value: string) {
     source = value;
-    notice = "Edited";
+    notice = copy.notices.edited;
   }
 
   function chooseExample(id: ExampleId) {
@@ -75,36 +95,35 @@
 
     selectedId = id;
     source = example.source;
-    runResult = runPreview(example.source, example);
+    runResult = runPreview(example.source, example, locale);
     panel = "output";
-    notice = `Loaded ${example.title}`;
+    notice = copy.notices.loaded(copy.examples[example.id].title);
   }
 
   function checkSource() {
     panel = "problems";
-    notice =
-      errors.length === 0
-        ? "Check complete — no structural errors"
-        : `Check complete — ${errors.length} error${errors.length === 1 ? "" : "s"}`;
+    notice = copy.notices.checked(errors.length);
   }
 
   function formatCurrentSource() {
     source = formatSource(source);
-    notice = "Formatted";
+    notice = copy.notices.formatted;
   }
 
   function runCurrentSource() {
-    const result = runPreview(source, selectedExample);
+    const result = runPreview(source, selectedExample, locale);
     runResult = result;
     panel = result.status === "error" ? "problems" : "output";
     notice =
-      result.status === "error" ? "Run blocked by errors" : "Preview complete";
+      result.status === "error"
+        ? copy.notices.blocked
+        : copy.notices.complete;
   }
 
   async function copyShareLink() {
     const url = createShareUrl(window.location.href, source);
     await copyText(url);
-    notice = "Share link copied";
+    notice = copy.notices.copied;
   }
 
   function handleShortcut(event: KeyboardEvent) {
@@ -127,22 +146,19 @@
 </script>
 
 <svelte:head>
-  <title>Nomo Playground</title>
-  <meta
-    name="description"
-    content="Explore real Nomo syntax with structural diagnostics, formatting, curated output, and shareable source links."
-  />
-  <meta property="og:title" content="Nomo Playground" />
-  <meta
-    property="og:description"
-    content="A fast, install-free way to explore the Nomo programming language."
-  />
+  <title>{copy.meta.title}</title>
+  <meta name="description" content={copy.meta.description} />
+  <meta property="og:title" content={copy.meta.title} />
+  <meta property="og:description" content={copy.meta.ogDescription} />
+  <link rel="alternate" hreflang="en" href="/" />
+  <link rel="alternate" hreflang="zh-CN" href="/zh/" />
+  <link rel="alternate" hreflang="x-default" href="/" />
 </svelte:head>
 
 <svelte:window onkeydown={handleShortcut} />
 
 <div class="app-shell">
-  <a class="skip-link" href="#editor">Skip to editor</a>
+  <a class="skip-link" href="#editor">{copy.skip}</a>
 
   <header class="topbar">
     <a
@@ -154,16 +170,23 @@
     </a>
     <div class="product-name">
       <strong>Playground</strong>
-      <span>Browser preview</span>
+      <span>{copy.browserPreview}</span>
     </div>
-    <nav aria-label="Playground links">
-      <a href="https://github.com/nomo-lang/nomo/tree/main/docs">Docs</a>
-      <a href="https://github.com/nomo-lang/nomo-playground">GitHub</a>
+    <nav aria-label={copy.navLabel}>
+      <a href="https://github.com/nomo-lang/nomo/tree/main/docs">
+        {copy.nav[0]}
+      </a>
+      <a href="https://github.com/nomo-lang/nomo-playground">
+        {copy.nav[1]}
+      </a>
+      <a class="locale-link" data-sveltekit-reload href={switchHref}>
+        {copy.switchLanguage}
+      </a>
       <a
         class="install-link"
         href="https://github.com/nomo-lang/nomo/releases"
       >
-        Install Nomo
+        {copy.nav[2]}
         <span aria-hidden="true">↗</span>
       </a>
     </nav>
@@ -172,21 +195,18 @@
   <div class="preview-note">
     <span>
       <i aria-hidden="true"></i>
-      PHASE 1
+      {copy.phase}
     </span>
-    <p>
-      Local structural checker + curated runner. Full compilation requires the
-      native Nomo CLI.
-    </p>
+    <p>{copy.phaseNote}</p>
     <a href="https://github.com/nomo-lang/nomo">
-      Get the compiler <span aria-hidden="true">→</span>
+      {copy.getCompiler} <span aria-hidden="true">→</span>
     </a>
   </div>
 
   <main class="workspace">
-    <aside class="examples" aria-label="Examples">
+    <aside class="examples" aria-label={copy.examplesLabel}>
       <div class="pane-title">
-        <span>EXAMPLES</span>
+        <span>{copy.examplesLabel}</span>
         <span>{String(examples.length).padStart(2, "0")}</span>
       </div>
       <div class="example-list">
@@ -198,28 +218,28 @@
             type="button"
           >
             <span>{String(index + 1).padStart(2, "0")}</span>
-            <strong>{example.title}</strong>
-            <small>{example.focus}</small>
+            <strong>{copy.examples[example.id].title}</strong>
+            <small>{copy.examples[example.id].focus}</small>
           </button>
         {/each}
       </div>
       <div class="example-detail">
-        <span>SELECTED EXAMPLE</span>
-        <strong>{selectedExample.title}</strong>
-        <p>{selectedExample.description}</p>
+        <span>{copy.selectedExample}</span>
+        <strong>{selectedExampleCopy.title}</strong>
+        <p>{selectedExampleCopy.description}</p>
         <a
           href="https://github.com/nomo-lang/nomo/tree/main/examples/{upstreamExamplePath(
             selectedExample.id,
           )}"
         >
-          View upstream <span aria-hidden="true">↗</span>
+          {copy.viewUpstream} <span aria-hidden="true">↗</span>
         </a>
       </div>
     </aside>
 
     <section class="source-pane" id="editor">
       <div class="mobile-example">
-        <label for="example-select">Example</label>
+        <label for="example-select">{copy.example}</label>
         <select
           id="example-select"
           onchange={(event) =>
@@ -227,7 +247,7 @@
           value={selectedId}
         >
           {#each examples as example (example.id)}
-            <option value={example.id}>{example.title}</option>
+            <option value={example.id}>{copy.examples[example.id].title}</option>
           {/each}
         </select>
       </div>
@@ -236,7 +256,7 @@
           <span aria-hidden="true">◇</span>
           main.nomo
           {#if isEdited}
-            <i aria-label="Edited"></i>
+            <i aria-label={copy.editedLabel}></i>
           {/if}
         </div>
         <div class="source-tabs__meta">
@@ -244,13 +264,13 @@
           <span>UTF-8</span>
         </div>
       </div>
-      <div class="toolbar" aria-label="Editor actions">
+      <div class="toolbar" aria-label={copy.editorActions}>
         <button onclick={formatCurrentSource} type="button">
-          Format
+          {copy.actions[0]}
           <kbd>⇧⌘F</kbd>
         </button>
         <button onclick={checkSource} type="button">
-          Check
+          {copy.actions[1]}
           <span class="count" class:is-error={errors.length > 0}>
             {errors.length}
           </span>
@@ -261,15 +281,16 @@
           type="button"
         >
           <span aria-hidden="true">▶</span>
-          Run example
+          {copy.actions[2]}
           <kbd>⌘↵</kbd>
         </button>
         <button onclick={() => void copyShareLink()} type="button">
-          Copy link
+          {copy.actions[3]}
           <span aria-hidden="true">↗</span>
         </button>
       </div>
       <Editor
+        label={copy.editorLabel}
         oncursorchange={(line, column) => (cursor = { line, column })}
         onsourcechange={updateSource}
         {source}
@@ -281,15 +302,15 @@
         >
           <i aria-hidden="true"></i>
           {errors.length
-            ? `${errors.length} error${errors.length === 1 ? "" : "s"}`
-            : "Structure valid"}
+            ? copy.errorCount(errors.length)
+            : copy.structureValid}
         </span>
         <span aria-live="polite">{notice}</span>
-        <span>Ln {cursor.line}, Col {cursor.column}</span>
+        <span>{copy.cursor(cursor.line, cursor.column)}</span>
       </div>
     </section>
 
-    <section class="result-pane" aria-label="Playground results">
+    <section class="result-pane" aria-label={copy.resultsLabel}>
       <div class="result-tabs" role="tablist">
         <button
           aria-selected={panel === "output"}
@@ -298,7 +319,7 @@
           role="tab"
           type="button"
         >
-          Output
+          {copy.tabs[0]}
         </button>
         <button
           aria-selected={panel === "problems"}
@@ -307,7 +328,7 @@
           role="tab"
           type="button"
         >
-          Problems
+          {copy.tabs[1]}
           <span>{diagnostics.length}</span>
         </button>
       </div>
@@ -315,21 +336,18 @@
       {#if panel === "output"}
         <div class="output-panel" role="tabpanel">
           <div class="output-panel__meta">
-            <span>PROGRAM OUTPUT</span>
+            <span>{copy.programOutput}</span>
             <span class="run-status run-status--{runResult.status}">
-              {runResult.status}
+              {copy.statuses[runResult.status]}
             </span>
           </div>
           <pre><span class="prompt" aria-hidden="true">$</span> nomo run{newline}<strong>{runResult.output}</strong></pre>
           <p>{runResult.note}</p>
           <div class="native-callout">
-            <span>NEED THE REAL BUILD?</span>
-            <p>
-              Compile arbitrary source to readable C99 and a native binary with
-              the Nomo CLI.
-            </p>
+            <span>{copy.realBuild}</span>
+            <p>{copy.realBuildNote}</p>
             <a href="https://github.com/nomo-lang/nomo/releases">
-              Download preview <span aria-hidden="true">→</span>
+              {copy.downloadPreview} <span aria-hidden="true">→</span>
             </a>
           </div>
         </div>
@@ -338,11 +356,8 @@
           {#if diagnostics.length === 0}
             <div class="empty-state">
               <span aria-hidden="true">✓</span>
-              <strong>No structural problems</strong>
-              <p>
-                The browser checker found a package, a runnable main function,
-                and balanced syntax.
-              </p>
+              <strong>{copy.noProblems}</strong>
+              <p>{copy.noProblemsNote}</p>
             </div>
           {:else}
             <ol>
@@ -352,8 +367,10 @@
                   <div>
                     <strong>{diagnostic.message}</strong>
                     <small>
-                      {diagnostic.code} · line {diagnostic.line}, column
-                      {diagnostic.column}
+                      {diagnostic.code} · {copy.location(
+                        diagnostic.line,
+                        diagnostic.column,
+                      )}
                     </small>
                   </div>
                 </li>
@@ -366,10 +383,10 @@
   </main>
 
   <footer class="app-footer">
-    <span>Nomo Playground · Phase 1</span>
-    <span>Local analysis only — no source leaves your browser</span>
+    <span>{copy.footer[0]}</span>
+    <span>{copy.footer[1]}</span>
     <a href="https://github.com/nomo-lang/nomo-playground/issues">
-      Report an issue ↗
+      {copy.footer[2]}
     </a>
   </footer>
 </div>

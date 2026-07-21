@@ -3,17 +3,20 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "packageManager": "pnpm@11.15.1",
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "pnpm run build && wrangler dev",
+    "check:cloudflare": "pnpm run build && wrangler deploy --dry-run",
+    "deploy": "pnpm run build && wrangler deploy",
     "prepare": "svelte-kit sync",
     "lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "devDependencies": {
-    "@sveltejs/adapter-static": "3.0.10",
+    "@sveltejs/adapter-cloudflare": "7.2.9",
     "@sveltejs/kit": "2.70.1",
     "@sveltejs/vite-plugin-svelte": "7.2.0",
     "@types/node": "26.1.1",
@@ -21,9 +24,7 @@
     "svelte-check": "4.7.3",
     "typescript": "6.0.3",
     "vite": "8.1.5",
-    "vitest": "4.1.10"
-  },
-  "overrides": {
-    "cookie": "0.7.2"
+    "vitest": "4.1.10",
+    "wrangler": "4.112.0"
   }
 }
