@@ -9,6 +9,7 @@
     "build": "vite build",
     "preview": "pnpm run build && wrangler dev",
     "check:cloudflare": "pnpm run build && wrangler deploy --dry-run",
+    "smoke:production": "node scripts/smoke-production.mjs",
     "deploy": "pnpm run build && wrangler deploy",
     "prepare": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && svelte-kit sync",
     "lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",

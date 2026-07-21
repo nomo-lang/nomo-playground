@@ -80,5 +80,10 @@
   "run_fixture": "Curated browser fixture · {title}",
   "run_literal_note": "Local literal-output preview · not the native Nomo compiler",
   "run_no_output": "No browser-runnable literal output found.",
-  "run_cli_note": "Use the Nomo CLI to compile and run arbitrary source."
+  "run_cli_note": "Use the Nomo CLI to compile and run arbitrary source.",
+  "error_kicker": "PLAYGROUND / {status}",
+  "error_title": "Route not found",
+  "error_description": "This playground link is unavailable. Return to the editor and create a fresh share link.",
+  "error_home": "Return to playground",
+  "error_website": "Visit Nomo"
 }
