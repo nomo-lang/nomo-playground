@@ -148,22 +148,22 @@
   <meta property="og:description" content={copy.meta.ogDescription} />
   <link
     rel="canonical"
-    href={`https://playground.nomo-lang.org${localizeHref("/")}`}
+    href={`https://play.nomo-lang.org${localizeHref("/")}`}
   />
   <link
     rel="alternate"
     hreflang="en"
-    href="https://playground.nomo-lang.org/"
+    href="https://play.nomo-lang.org/"
   />
   <link
     rel="alternate"
     hreflang="zh-CN"
-    href="https://playground.nomo-lang.org/zh/"
+    href="https://play.nomo-lang.org/zh/"
   />
   <link
     rel="alternate"
     hreflang="x-default"
-    href="https://playground.nomo-lang.org/"
+    href="https://play.nomo-lang.org/"
   />
 </svelte:head>
 

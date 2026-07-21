@@ -6,7 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "routes": [
     {
-      "pattern": "playground.nomo-lang.org",
+      "pattern": "play.nomo-lang.org",
       "custom_domain": true
     }
   ],

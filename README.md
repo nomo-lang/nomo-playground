@@ -30,7 +30,7 @@ pnpm run check:cloudflare
 
 The production target is Cloudflare Workers Static Assets. The checked-in
 `wrangler.jsonc` deploys the SvelteKit worker and its prerendered assets as one
-unit. It also declares `https://playground.nomo-lang.org` as the production
+unit. It also declares `https://play.nomo-lang.org` as the production
 custom domain so DNS, TLS, and the Worker route remain version-controlled.
 
 To test the production runtime locally:

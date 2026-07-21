@@ -1,5 +1,5 @@
 const base = new URL(
-  process.env.PLAYGROUND_URL ?? "https://playground.nomo-lang.org/",
+  process.env.PLAYGROUND_URL ?? "https://play.nomo-lang.org/",
 );
 
 const pages = [
@@ -14,7 +14,7 @@ for (const [pathname, marker] of pages) {
   if (!response.ok || !body.includes(marker)) {
     throw new Error(`${url} failed: ${response.status}, marker ${marker}`);
   }
-  if (!body.includes(`https://playground.nomo-lang.org${pathname}`)) {
+  if (!body.includes(`https://play.nomo-lang.org${pathname}`)) {
     throw new Error(`${url} is missing its canonical URL`);
   }
 }
