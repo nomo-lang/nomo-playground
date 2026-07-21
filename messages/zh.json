@@ -80,5 +80,10 @@
   "run_fixture": "精选浏览器示例 · {title}",
   "run_literal_note": "本地字面量输出预览 · 并非原生 Nomo 编译器",
   "run_no_output": "没有找到可在浏览器中运行的字面量输出。",
-  "run_cli_note": "请使用 Nomo CLI 编译并运行任意源码。"
+  "run_cli_note": "请使用 Nomo CLI 编译并运行任意源码。",
+  "error_kicker": "PLAYGROUND / {status}",
+  "error_title": "路径未找到",
+  "error_description": "这个 Playground 链接不可用。请返回编辑器并创建新的分享链接。",
+  "error_home": "返回 Playground",
+  "error_website": "访问 Nomo 官网"
 }
