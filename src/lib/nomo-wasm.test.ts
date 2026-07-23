@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 
 import { beforeAll, describe, expect, it } from "vitest";
 
-import { examples } from "./data/examples";
+import { examples, type ExampleId } from "./data/examples";
 import {
   executeNomo,
   MAX_SOURCE_BYTES,
@@ -29,7 +29,7 @@ type NomoWasmExports = {
   nomo_result_len(): number;
 };
 
-const expectedOutputs: Record<string, string> = {
+const expectedOutputs: Record<ExampleId, string> = {
   hello: Array.from(
     { length: 10 },
     (_, index) => `Hello, Nomo ${index}\n`,
@@ -37,6 +37,22 @@ const expectedOutputs: Record<string, string> = {
   arithmetic: "35\n-35\n",
   "struct-methods": "a@nomo.dev\n",
   array: "array ok\n",
+  "game-of-life": ".....\n..#..\n..#..\n..#..\n.....\n",
+  "fibonacci-closure": "0 1 1 2 3 5 8 13 21 34\n",
+  "peano-integers": "5\n",
+  "concurrent-pi": "pi ~= 3.140592653839794\n",
+  "concurrent-prime-sieve": "2 3 5 7 11 13 17 19 23 29 31 37\n",
+  "peg-solitaire": "solution moves: 2\n",
+  "tree-comparison":
+    "left == same: true\nleft == different: false\n",
+  "clear-screen": "old frame\n\n\n\n\n\n\n\n\nnew frame\n",
+  "http-server": "HTTP 200\n\nHello from Nomo\n",
+  "display-image":
+    "  ██  ██  \n██████████\n██████████\n  ██████  \n    ██    \n",
+  "multiple-files": "multiple files 42\n",
+  sleep: "tick 3\ntick 2\ntick 1\nawake\n",
+  "test-function": "test passed; run all tests with nomo test\n",
+  "generic-index": "Nomo\n",
 };
 
 let bytes: Uint8Array<ArrayBuffer>;

@@ -209,12 +209,6 @@
       formatCurrentSource();
     }
   }
-
-  function upstreamExamplePath(id: ExampleId) {
-    if (id === "struct-methods") return "struct_methods";
-    if (id === "array") return "array_basic";
-    return id;
-  }
 </script>
 
 <svelte:head>
@@ -322,13 +316,13 @@
         <span>{copy.selectedExample}</span>
         <strong>{selectedExampleCopy.title}</strong>
         <p>{selectedExampleCopy.description}</p>
-        <a
-          href="https://github.com/nomo-lang/nomo/tree/main/examples/{upstreamExamplePath(
-            selectedExample.id,
-          )}"
-        >
-          {copy.viewUpstream} <span aria-hidden="true">↗</span>
-        </a>
+        {#if selectedExample.upstreamPath}
+          <a
+            href="https://github.com/nomo-lang/nomo/tree/main/examples/{selectedExample.upstreamPath}"
+          >
+            {copy.viewUpstream} <span aria-hidden="true">↗</span>
+          </a>
+        {/if}
       </div>
     </aside>
 
