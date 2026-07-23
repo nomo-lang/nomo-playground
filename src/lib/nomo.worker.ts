@@ -3,6 +3,7 @@ import type {
   NomoWorkerRequest,
   NomoWorkerResponse,
 } from "./nomo-runtime";
+import { nomoWasmAssetUrl } from "./nomo-wasm-assets";
 
 type NomoWasmExports = WebAssembly.Exports & {
   memory: WebAssembly.Memory;
@@ -44,7 +45,7 @@ function isNomoWasmExports(
 }
 
 async function instantiateRuntime() {
-  const response = await fetch("/wasm/nomo_wasm.wasm", {
+  const response = await fetch(nomoWasmAssetUrl(), {
     cache: "force-cache",
   });
   if (!response.ok) {
