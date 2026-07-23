@@ -26,7 +26,10 @@ type NomoWasmExports = {
 };
 
 const expectedOutputs: Record<string, string> = {
-  hello: "Hello, Nomo\n",
+  hello: Array.from(
+    { length: 10 },
+    (_, index) => `Hello, Nomo ${index}\n`,
+  ).join(""),
   arithmetic: "35\n-35\n",
   "struct-methods": "a@nomo.dev\n",
   array: "array ok\n",
@@ -112,7 +115,7 @@ fn main() -> void {
     );
 
     expect(response.status).toBe("compile_error");
-    expect(response.diagnostic?.code).toBe("E0102");
+    expect(response.diagnostic?.code).toBe("E0213");
   });
 
   it("enforces source and memory ceilings", async () => {
