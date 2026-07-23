@@ -79,6 +79,44 @@ describe("preview runner", () => {
     });
   });
 
+  it("previews edited string output through a helper and typed binding", () => {
+    const source = `package app.main
+
+import std.io
+
+fn greeting() -> string {
+    return "Hello, changed Nomo"
+}
+
+fn main() -> void {
+    let message: string = greeting()
+    io.println(message)
+}
+`;
+    expect(runPreview(source, defaultExample)).toMatchObject({
+      status: "preview",
+      output: "Hello, changed Nomo",
+    });
+  });
+
+  it("does not recurse forever when preview helpers call themselves", () => {
+    const source = `package app.main
+
+import std.io
+
+fn greeting() -> string {
+    return greeting()
+}
+
+fn main() -> void {
+    io.println(greeting())
+}
+`;
+    expect(runPreview(source)).toMatchObject({
+      status: "preview",
+    });
+  });
+
   it("blocks source with structural errors", () => {
     expect(runPreview("package app.main")).toMatchObject({
       status: "error",

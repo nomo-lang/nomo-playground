@@ -257,6 +257,181 @@ function selectedFixture(source: string, selected: Example | undefined) {
   return examples.find((example) => normalize(example.source) === normalize(source));
 }
 
+type PreviewFunction = {
+  name: string;
+  returnType: "string" | "void";
+  body: string;
+};
+
+function closingBraceIndex(source: string, openingIndex: number) {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  let inComment = false;
+
+  for (let index = openingIndex; index < source.length; index += 1) {
+    const character = source[index];
+    const next = source[index + 1];
+
+    if (character === "\n") {
+      inComment = false;
+      continue;
+    }
+    if (inComment) continue;
+    if (!inString && character === "/" && next === "/") {
+      inComment = true;
+      index += 1;
+      continue;
+    }
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === "\"") inString = false;
+      continue;
+    }
+    if (character === "\"") {
+      inString = true;
+      continue;
+    }
+    if (character === "{") depth += 1;
+    if (character === "}") {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+
+  return undefined;
+}
+
+function previewFunctions(source: string) {
+  const functions = new Map<string, PreviewFunction>();
+  const header =
+    /\bfn\s+([a-zA-Z_]\w*)\s*\(\s*\)\s*->\s*(string|void)\s*\{/g;
+
+  for (const match of source.matchAll(header)) {
+    const openingIndex = match.index + match[0].lastIndexOf("{");
+    const closingIndex = closingBraceIndex(source, openingIndex);
+    if (closingIndex === undefined) continue;
+    functions.set(match[1], {
+      name: match[1],
+      returnType: match[2] as PreviewFunction["returnType"],
+      body: source.slice(openingIndex + 1, closingIndex),
+    });
+  }
+
+  return functions;
+}
+
+function decodeStringLiteral(expression: string) {
+  const match = expression.trim().match(/^"((?:\\.|[^"\\])*)"$/);
+  if (!match) return undefined;
+  try {
+    return JSON.parse(`"${match[1]}"`) as string;
+  } catch {
+    return match[1];
+  }
+}
+
+function evaluateStringExpression(
+  expression: string,
+  bindings: ReadonlyMap<string, string>,
+  functions: ReadonlyMap<string, PreviewFunction>,
+  callStack: ReadonlySet<string>,
+): string | undefined {
+  const literal = decodeStringLiteral(expression);
+  if (literal !== undefined) return literal;
+
+  const trimmed = expression.trim();
+  if (/^[a-zA-Z_]\w*$/.test(trimmed)) return bindings.get(trimmed);
+
+  const call = trimmed.match(/^([a-zA-Z_]\w*)\(\)$/);
+  if (!call || callStack.has(call[1])) return undefined;
+  const target = functions.get(call[1]);
+  if (!target || target.returnType !== "string") return undefined;
+
+  return evaluateStringFunction(target, functions, new Set(callStack).add(call[1]));
+}
+
+function evaluateStringFunction(
+  fn: PreviewFunction,
+  functions: ReadonlyMap<string, PreviewFunction>,
+  callStack: ReadonlySet<string>,
+) {
+  const bindings = new Map<string, string>();
+
+  for (const sourceLine of fn.body.split("\n")) {
+    const line = sourceLine.trim();
+    if (!line || line.startsWith("//")) continue;
+
+    const binding = line.match(
+      /^let\s+([a-zA-Z_]\w*)(?:\s*:\s*string)?\s*=\s*(.+)$/,
+    );
+    if (binding) {
+      const value = evaluateStringExpression(
+        binding[2],
+        bindings,
+        functions,
+        callStack,
+      );
+      if (value !== undefined) bindings.set(binding[1], value);
+      continue;
+    }
+
+    const returned = line.match(/^return\s+(.+)$/);
+    if (returned) {
+      return evaluateStringExpression(
+        returned[1],
+        bindings,
+        functions,
+        callStack,
+      );
+    }
+  }
+
+  return undefined;
+}
+
+function evaluatePreviewOutput(source: string) {
+  const functions = previewFunctions(source);
+  const main = functions.get("main");
+  if (!main) return [];
+
+  const bindings = new Map<string, string>();
+  const output: string[] = [];
+  const callStack = new Set(["main"]);
+
+  for (const sourceLine of main.body.split("\n")) {
+    const line = sourceLine.trim();
+    if (!line || line.startsWith("//")) continue;
+
+    const binding = line.match(
+      /^let\s+([a-zA-Z_]\w*)(?:\s*:\s*string)?\s*=\s*(.+)$/,
+    );
+    if (binding) {
+      const value = evaluateStringExpression(
+        binding[2],
+        bindings,
+        functions,
+        callStack,
+      );
+      if (value !== undefined) bindings.set(binding[1], value);
+      continue;
+    }
+
+    const printed = line.match(/^io\.println\((.+)\)$/);
+    if (!printed) continue;
+    const value = evaluateStringExpression(
+      printed[1],
+      bindings,
+      functions,
+      callStack,
+    );
+    if (value !== undefined) output.push(value);
+  }
+
+  return output;
+}
+
 export function runPreview(
   source: string,
   selected?: Example,
@@ -283,16 +458,7 @@ export function runPreview(
     };
   }
 
-  const literals = Array.from(
-    source.matchAll(/io\.println\("((?:\\.|[^"\\])*)"\)/g),
-    (match) => {
-      try {
-        return JSON.parse(`"${match[1]}"`) as string;
-      } catch {
-        return match[1];
-      }
-    },
-  );
+  const literals = evaluatePreviewOutput(source);
 
   if (literals.length > 0) {
     return {
