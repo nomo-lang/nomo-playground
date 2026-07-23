@@ -15,7 +15,7 @@
   "get_compiler": "查看运行时源码",
   "examples_label": "示例",
   "example_hello_title": "你好，Nomo",
-  "example_hello_description": "类型推导、三段式循环与多值输出。",
+  "example_hello_description": "类型推导、编译期检查格式化与三段式循环。",
   "example_hello_focus": "基础",
   "example_arithmetic_title": "算术运算",
   "example_arithmetic_description": "整数表达式、优先级与类型转换。",
