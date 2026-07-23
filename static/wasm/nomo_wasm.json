@@ -1,10 +1,10 @@
 {
   "engine": "nomo-wasm",
   "source_repository": "https://github.com/nomo-lang/nomo",
-  "source_commit": "7fbe6e5990acf7cc0ceb25b5ad247d8d0420b874",
+  "source_commit": "7a81ff472207e98bee68d5de3dcde934811add0c",
   "target": "wasm32-unknown-unknown",
-  "sha256": "1ccd7db5b0673580646d647b6815d3f8204b0f01a026718c8bf1048852f32a6e",
-  "bytes": 1762710,
+  "sha256": "3c550d54f450007c8275069c74187bccd22d4433f5c926a3a3d6003a8eb87ea9",
+  "bytes": 1786640,
   "memory_limit_bytes": 67108864,
   "source_limit_bytes": 262144
 }

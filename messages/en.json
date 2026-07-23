@@ -15,7 +15,7 @@
   "get_compiler": "View runtime source",
   "examples_label": "Examples",
   "example_hello_title": "Hello, Nomo",
-  "example_hello_description": "Inference, three-clause loops, and multi-value output.",
+  "example_hello_description": "Inference, checked formatting, and three-clause loops.",
   "example_hello_focus": "Basics",
   "example_arithmetic_title": "Arithmetic",
   "example_arithmetic_description": "Integer expressions, precedence, and conversion.",

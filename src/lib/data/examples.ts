@@ -13,10 +13,11 @@ export const examples: Example[] = [
   {
     id: "hello",
     title: "Hello, Nomo",
-    description: "Inference, three-clause loops, and multi-value output.",
+    description: "Inference, checked formatting, and three-clause loops.",
     focus: "Basics",
     source: `package app.main
 
+import std.fmt
 import std.io
 
 fn greeting() -> string {
@@ -27,7 +28,7 @@ fn main() -> void {
     let message = greeting()
 
     for let i: ui64 = 0; i < 10; i++ {
-        io.println(message, i)
+        io.println(fmt.format("{} {}", message, i))
     }
 }
 `,
