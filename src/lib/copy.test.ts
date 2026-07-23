@@ -8,9 +8,9 @@ describe("playground message catalogs", () => {
     expect(Object.keys(zh).sort()).toEqual(Object.keys(en).sort());
   });
 
-  it("contains translated examples and diagnostics", () => {
+  it("contains translated examples and runtime states", () => {
     expect(en.example_arithmetic_title).toBe("Arithmetic");
     expect(zh.example_arithmetic_title).toBe("算术运算");
-    expect(zh.diagnostic_package).toContain("package 声明");
+    expect(zh.notice_running).toContain("WASM");
   });
 });
