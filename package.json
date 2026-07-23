@@ -14,7 +14,8 @@
     "prepare": "paraglide-js compile --project ./project.inlang --outdir ./src/lib/paraglide && svelte-kit sync",
     "lint": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "verify:wasm": "vitest run src/lib/nomo-wasm.test.ts"
   },
   "devDependencies": {
     "@inlang/paraglide-js": "^2.18.2",

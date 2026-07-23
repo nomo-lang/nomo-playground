@@ -7,7 +7,6 @@ export type Example = {
   description: string;
   focus: string;
   source: string;
-  output: string;
 };
 
 export const examples: Example[] = [
@@ -29,7 +28,6 @@ fn main() -> void {
     io.println(message)
 }
 `,
-    output: "Hello, Nomo",
   },
   {
     id: "arithmetic",
@@ -48,7 +46,6 @@ fn main() -> void {
     io.println(num.to_string(negated))
 }
 `,
-    output: "35\n-35",
   },
   {
     id: "struct-methods",
@@ -75,7 +72,6 @@ fn main() -> void {
     io.println(email)
 }
 `,
-    output: "a@nomo.dev",
   },
   {
     id: "array",
@@ -104,7 +100,6 @@ fn main() -> void {
     io.println(message)
 }
 `,
-    output: "array ok",
   },
 ];
 

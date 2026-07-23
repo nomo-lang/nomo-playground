@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from "$app/paths";
   import { onMount } from "svelte";
 
   import Editor from "$lib/components/Editor.svelte";
@@ -9,45 +10,88 @@
     type ExampleId,
   } from "$lib/data/examples";
   import { getPlaygroundCopy } from "$lib/copy";
+  import {
+    checkNomo,
+    readyResponse,
+    runNomo,
+    type NomoDiagnostic,
+    type NomoResponse,
+  } from "$lib/nomo-runtime";
   import { getLocale, localizeHref } from "$lib/paraglide/runtime";
   import {
-    analyze,
     createShareUrl,
     decodeSource,
     formatSource,
-    runPreview,
-    type RunResult,
   } from "$lib/playground";
 
   type Panel = "output" | "problems";
+  type DisplayStatus = "ready" | "running" | "success" | "error";
   const newline = "\n";
 
   let locale = $derived(getLocale());
   let copy = $derived(getPlaygroundCopy(locale));
-  let switchHref = $state(localizeHref("/", { locale: targetLocale() }));
+  let switchSearch = $state("");
 
   let source = $state(defaultExample.source);
   let selectedId = $state<ExampleId>(defaultExample.id);
   let panel = $state<Panel>("output");
-  let runResult = $state<RunResult>(
-    runPreview(defaultExample.source, defaultExample, getLocale()),
-  );
+  let runResult = $state<NomoResponse>(readyResponse());
+  let diagnostics = $state<NomoDiagnostic[]>([]);
+  let busy = $state(false);
+  let hasValidated = $state(false);
+  let operationVersion = 0;
   let cursor = $state({ line: 1, column: 1 });
   let notice = $state<string>(getPlaygroundCopy(getLocale()).notices.ready);
 
   let selectedExample = $derived(findExample(selectedId) ?? defaultExample);
   let selectedExampleCopy = $derived(copy.examples[selectedExample.id]);
-  let diagnostics = $derived(analyze(source, locale));
   let errors = $derived(
     diagnostics.filter((diagnostic) => diagnostic.severity === "error"),
   );
   let isEdited = $derived(source !== selectedExample.source);
+  let displayStatus = $derived.by<DisplayStatus>(() => {
+    if (busy) return "running";
+    if (runResult.status === "success") return "success";
+    if (
+      runResult.status === "compile_error" ||
+      runResult.status === "runtime_error"
+    ) {
+      return "error";
+    }
+    return "ready";
+  });
+  let displayOutput = $derived.by(() => {
+    if (busy) return copy.run.runningOutput;
+    if (runResult.status === "runtime_error") {
+      return runResult.runtime_error
+        ? `${runResult.runtime_error.code}: ${runResult.runtime_error.message}`
+        : copy.run.emptyOutput;
+    }
+    return runResult.stdout || copy.run.emptyOutput;
+  });
+  let runNote = $derived.by(() => {
+    if (busy) return copy.notices.running;
+    if (runResult.status === "success") {
+      return copy.run.successNote(
+        runResult.stats.steps,
+        runResult.stats.output_bytes,
+      );
+    }
+    if (runResult.status === "compile_error") {
+      return copy.run.compileErrorNote;
+    }
+    if (runResult.status === "runtime_error") {
+      return copy.run.runtimeErrorNote(
+        runResult.runtime_error?.code ?? "NOMO-WASM-007",
+      );
+    }
+    return copy.run.readyNote;
+  });
 
   onMount(() => {
-    switchHref = localizeHref(`/${window.location.search}`, {
-      locale: targetLocale(),
-    });
+    switchSearch = window.location.search;
     loadSharedSource();
+    void runCurrentSource();
   });
 
   function targetLocale() {
@@ -60,7 +104,6 @@
     if (!sharedSource) return;
 
     source = sharedSource;
-    runResult = runPreview(sharedSource, undefined, locale);
     notice = copy.notices.shared;
   }
 
@@ -81,7 +124,12 @@
   }
 
   function updateSource(value: string) {
+    operationVersion += 1;
     source = value;
+    runResult = readyResponse();
+    diagnostics = [];
+    busy = false;
+    hasValidated = false;
     notice = copy.notices.edited;
   }
 
@@ -91,29 +139,57 @@
 
     selectedId = id;
     source = example.source;
-    runResult = runPreview(example.source, example, locale);
     panel = "output";
     notice = copy.notices.loaded(copy.examples[example.id].title);
+    void runCurrentSource();
   }
 
-  function checkSource() {
+  function setDiagnostics(response: NomoResponse) {
+    diagnostics = response.diagnostic ? [response.diagnostic] : [];
+  }
+
+  async function checkSource() {
+    const version = ++operationVersion;
+    busy = true;
     panel = "problems";
-    notice = copy.notices.checked(errors.length);
+    notice = copy.notices.checking;
+    const response = await checkNomo(source);
+    if (version !== operationVersion) return;
+
+    busy = false;
+    hasValidated = true;
+    runResult = response;
+    setDiagnostics(response);
+    notice = copy.notices.checked(
+      response.status === "compile_error" ? 1 : 0,
+    );
   }
 
   function formatCurrentSource() {
-    source = formatSource(source);
+    updateSource(formatSource(source));
     notice = copy.notices.formatted;
   }
 
-  function runCurrentSource() {
-    const result = runPreview(source, selectedExample, locale);
-    runResult = result;
-    panel = result.status === "error" ? "problems" : "output";
-    notice =
-      result.status === "error"
-        ? copy.notices.blocked
-        : copy.notices.complete;
+  async function runCurrentSource() {
+    const version = ++operationVersion;
+    busy = true;
+    panel = "output";
+    notice = copy.notices.running;
+    const response = await runNomo(source);
+    if (version !== operationVersion) return;
+
+    busy = false;
+    hasValidated = true;
+    runResult = response;
+    setDiagnostics(response);
+    panel = response.status === "compile_error" ? "problems" : "output";
+    if (response.status === "compile_error") {
+      notice = copy.notices.blocked;
+    } else if (response.status === "runtime_error") {
+      notice = copy.notices.failed;
+    } else {
+      notice = copy.notices.complete;
+    }
   }
 
   async function copyShareLink() {
@@ -126,7 +202,7 @@
     const command = event.metaKey || event.ctrlKey;
     if (command && event.key === "Enter") {
       event.preventDefault();
-      runCurrentSource();
+      void runCurrentSource();
     }
     if (command && event.shiftKey && event.key.toLowerCase() === "f") {
       event.preventDefault();
@@ -190,7 +266,15 @@
       <a href="https://github.com/nomo-lang/nomo-playground">
         {copy.nav[1]}
       </a>
-      <a class="locale-link" data-sveltekit-reload href={switchHref}>
+      <a
+        class="locale-link"
+        data-sveltekit-reload
+        href={resolve(
+          `${localizeHref("/", {
+            locale: targetLocale(),
+          })}${switchSearch}` as "/",
+        )}
+      >
         {copy.switchLanguage}
       </a>
       <a
@@ -280,7 +364,7 @@
           {copy.actions[0]}
           <kbd>⇧⌘F</kbd>
         </button>
-        <button onclick={checkSource} type="button">
+        <button disabled={busy} onclick={() => void checkSource()} type="button">
           {copy.actions[1]}
           <span class="count" class:is-error={errors.length > 0}>
             {errors.length}
@@ -288,7 +372,8 @@
         </button>
         <button
           class="run-button"
-          onclick={runCurrentSource}
+          disabled={busy}
+          onclick={() => void runCurrentSource()}
           type="button"
         >
           <span aria-hidden="true">▶</span>
@@ -314,7 +399,7 @@
           <i aria-hidden="true"></i>
           {errors.length
             ? copy.errorCount(errors.length)
-            : copy.structureValid}
+            : copy.compilerReady}
         </span>
         <span aria-live="polite">{notice}</span>
         <span>{copy.cursor(cursor.line, cursor.column)}</span>
@@ -348,12 +433,18 @@
         <div class="output-panel" role="tabpanel">
           <div class="output-panel__meta">
             <span>{copy.programOutput}</span>
-            <span class="run-status run-status--{runResult.status}">
-              {copy.statuses[runResult.status]}
+            <span class="run-status run-status--{displayStatus}">
+              {copy.statuses[displayStatus]}
             </span>
           </div>
-          <pre><span class="prompt" aria-hidden="true">$</span> nomo run{newline}<strong>{runResult.output}</strong></pre>
-          <p>{runResult.note}</p>
+          <pre><span class="prompt" aria-hidden="true">$</span> nomo run --sandbox{newline}<strong>{displayOutput}</strong></pre>
+          {#if !busy && runResult.stderr}
+            <div class="stderr-output">
+              <span>{copy.run.stderrLabel}</span>
+              <pre>{runResult.stderr}</pre>
+            </div>
+          {/if}
+          <p>{runNote}</p>
           <div class="native-callout">
             <span>{copy.realBuild}</span>
             <p>{copy.realBuildNote}</p>
@@ -366,9 +457,15 @@
         <div class="problems-panel" role="tabpanel">
           {#if diagnostics.length === 0}
             <div class="empty-state">
-              <span aria-hidden="true">✓</span>
-              <strong>{copy.noProblems}</strong>
-              <p>{copy.noProblemsNote}</p>
+              <span aria-hidden="true">{hasValidated ? "✓" : "…"}</span>
+              <strong>
+                {hasValidated ? copy.noProblems : copy.awaitingCheck}
+              </strong>
+              <p>
+                {hasValidated
+                  ? copy.noProblemsNote
+                  : copy.awaitingCheckNote}
+              </p>
             </div>
           {:else}
             <ol>

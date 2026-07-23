@@ -64,7 +64,7 @@ export function getPlaygroundCopy(locale: Locale = getLocale()) {
       m.action_copy(noInputs, options),
     ],
     editorLabel: m.editor_label(noInputs, options),
-    structureValid: m.structure_valid(noInputs, options),
+    compilerReady: m.compiler_ready(noInputs, options),
     cursor: (line: number, column: number) =>
       m.cursor({ line, column }, options),
     errorCount: (count: number) =>
@@ -78,8 +78,9 @@ export function getPlaygroundCopy(locale: Locale = getLocale()) {
     ],
     programOutput: m.program_output(noInputs, options),
     statuses: {
+      ready: m.status_ready(noInputs, options),
+      running: m.status_running(noInputs, options),
       success: m.status_success(noInputs, options),
-      preview: m.status_preview(noInputs, options),
       error: m.status_error(noInputs, options),
     },
     realBuild: m.real_build(noInputs, options),
@@ -87,6 +88,8 @@ export function getPlaygroundCopy(locale: Locale = getLocale()) {
     downloadPreview: m.download_preview(noInputs, options),
     noProblems: m.no_problems(noInputs, options),
     noProblemsNote: m.no_problems_note(noInputs, options),
+    awaitingCheck: m.awaiting_check(noInputs, options),
+    awaitingCheckNote: m.awaiting_check_note(noInputs, options),
     location: (line: number, column: number) =>
       m.location({ line, column }, options),
     footer: [
@@ -106,32 +109,23 @@ export function getPlaygroundCopy(locale: Locale = getLocale()) {
           : m.notice_checked_many({ count }, options);
       },
       formatted: m.notice_formatted(noInputs, options),
+      checking: m.notice_checking(noInputs, options),
+      running: m.notice_running(noInputs, options),
       blocked: m.notice_blocked(noInputs, options),
       complete: m.notice_complete(noInputs, options),
+      failed: m.notice_failed(noInputs, options),
       copied: m.notice_copied(noInputs, options),
     },
-    diagnostics: {
-      unexpectedClosing: (character: string) =>
-        m.diagnostic_unexpected_closing({ character }, options),
-      unclosedString: m.diagnostic_unclosed_string(noInputs, options),
-      unmatchedOpening: (character: string) =>
-        m.diagnostic_unmatched_opening({ character }, options),
-      package: m.diagnostic_package(noInputs, options),
-      main: m.diagnostic_main(noInputs, options),
-      duplicateImport: (name: string, line: number) =>
-        m.diagnostic_duplicate_import({ name, line }, options),
-      semicolon: m.diagnostic_semicolon(noInputs, options),
-    },
     run: {
-      blockedOutput: (count: number) =>
-        count === 1
-          ? m.run_blocked_output_one({ count }, options)
-          : m.run_blocked_output_many({ count }, options),
-      blockedNote: m.run_blocked_note(noInputs, options),
-      fixture: (title: string) => m.run_fixture({ title }, options),
-      literalNote: m.run_literal_note(noInputs, options),
-      noOutput: m.run_no_output(noInputs, options),
-      cliNote: m.run_cli_note(noInputs, options),
+      readyNote: m.run_ready_note(noInputs, options),
+      runningOutput: m.run_running_output(noInputs, options),
+      successNote: (steps: number, bytes: number) =>
+        m.run_success_note({ steps, bytes }, options),
+      compileErrorNote: m.run_compile_error_note(noInputs, options),
+      runtimeErrorNote: (code: string) =>
+        m.run_runtime_error_note({ code }, options),
+      emptyOutput: m.run_empty_output(noInputs, options),
+      stderrLabel: m.stderr_label(noInputs, options),
     },
   };
 }

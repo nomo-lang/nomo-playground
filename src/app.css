@@ -454,6 +454,11 @@ a {
   color: var(--ink);
 }
 
+.toolbar button:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
+
 .toolbar .run-button {
   border-color: #2f75ef;
   background: #184b9f;
@@ -713,7 +718,12 @@ a {
   color: var(--green);
 }
 
-.run-status--preview {
+.run-status--ready {
+  border-color: #33445f;
+  color: #8aa5cc;
+}
+
+.run-status--running {
   border-color: #694b24;
   color: var(--yellow);
 }
@@ -744,6 +754,26 @@ a {
   margin: 0;
   color: #5f646c;
   font: 500 8px/1.5 var(--mono);
+}
+
+.stderr-output {
+  margin: 0 0 18px;
+  padding: 12px;
+  border: 1px solid #4c2929;
+  background: #100a0a;
+}
+
+.stderr-output > span {
+  color: var(--red);
+  font: 500 8px/1 var(--mono);
+  letter-spacing: 0.08em;
+}
+
+.stderr-output > pre {
+  margin: 9px 0 0;
+  color: #d28d8d;
+  font: 500 11px/1.6 var(--mono);
+  white-space: pre-wrap;
 }
 
 .native-callout {
