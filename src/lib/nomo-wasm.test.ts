@@ -9,6 +9,10 @@ import {
   MAX_SOURCE_BYTES,
   type NomoResponse,
 } from "./nomo-runtime";
+import {
+  NOMO_WASM_SHA256,
+  nomoWasmAssetUrl,
+} from "./nomo-wasm-assets";
 
 type NomoWasmExports = {
   memory: WebAssembly.Memory;
@@ -90,6 +94,12 @@ describe("nomo WebAssembly artifact", () => {
       manifest.sha256,
     );
     expect(WebAssembly.Module.imports(module)).toEqual([]);
+  });
+
+  it("versions the browser asset URL with the provenance digest", () => {
+    expect(nomoWasmAssetUrl()).toBe(
+      `/wasm/nomo_wasm.wasm?v=${NOMO_WASM_SHA256}`,
+    );
   });
 
   it.each(examples)("compiles and executes $id through the real runtime", (example) => {
