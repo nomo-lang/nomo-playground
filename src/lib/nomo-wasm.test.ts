@@ -93,6 +93,7 @@ describe("nomo WebAssembly artifact", () => {
     expect(createHash("sha256").update(bytes).digest("hex")).toBe(
       manifest.sha256,
     );
+    expect(NOMO_WASM_SHA256).toBe(manifest.sha256);
     expect(WebAssembly.Module.imports(module)).toEqual([]);
   });
 
