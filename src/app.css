@@ -257,6 +257,9 @@ a {
 }
 
 .example-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   padding: 10px 0;
 }
 

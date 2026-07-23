@@ -30,6 +30,79 @@ export function getPlaygroundCopy(locale: Locale = getLocale()) {
       description: m.example_array_description(noInputs, options),
       focus: m.example_array_focus(noInputs, options),
     },
+    "game-of-life": {
+      title: m.example_game_of_life_title(noInputs, options),
+      description: m.example_game_of_life_description(noInputs, options),
+      focus: m.example_game_of_life_focus(noInputs, options),
+    },
+    "fibonacci-closure": {
+      title: m.example_fibonacci_closure_title(noInputs, options),
+      description: m.example_fibonacci_closure_description(noInputs, options),
+      focus: m.example_fibonacci_closure_focus(noInputs, options),
+    },
+    "peano-integers": {
+      title: m.example_peano_integers_title(noInputs, options),
+      description: m.example_peano_integers_description(noInputs, options),
+      focus: m.example_peano_integers_focus(noInputs, options),
+    },
+    "concurrent-pi": {
+      title: m.example_concurrent_pi_title(noInputs, options),
+      description: m.example_concurrent_pi_description(noInputs, options),
+      focus: m.example_concurrent_pi_focus(noInputs, options),
+    },
+    "concurrent-prime-sieve": {
+      title: m.example_concurrent_prime_sieve_title(noInputs, options),
+      description: m.example_concurrent_prime_sieve_description(
+        noInputs,
+        options,
+      ),
+      focus: m.example_concurrent_prime_sieve_focus(noInputs, options),
+    },
+    "peg-solitaire": {
+      title: m.example_peg_solitaire_title(noInputs, options),
+      description: m.example_peg_solitaire_description(noInputs, options),
+      focus: m.example_peg_solitaire_focus(noInputs, options),
+    },
+    "tree-comparison": {
+      title: m.example_tree_comparison_title(noInputs, options),
+      description: m.example_tree_comparison_description(noInputs, options),
+      focus: m.example_tree_comparison_focus(noInputs, options),
+    },
+    "clear-screen": {
+      title: m.example_clear_screen_title(noInputs, options),
+      description: m.example_clear_screen_description(noInputs, options),
+      focus: m.example_clear_screen_focus(noInputs, options),
+    },
+    "http-server": {
+      title: m.example_http_server_title(noInputs, options),
+      description: m.example_http_server_description(noInputs, options),
+      focus: m.example_http_server_focus(noInputs, options),
+    },
+    "display-image": {
+      title: m.example_display_image_title(noInputs, options),
+      description: m.example_display_image_description(noInputs, options),
+      focus: m.example_display_image_focus(noInputs, options),
+    },
+    "multiple-files": {
+      title: m.example_multiple_files_title(noInputs, options),
+      description: m.example_multiple_files_description(noInputs, options),
+      focus: m.example_multiple_files_focus(noInputs, options),
+    },
+    sleep: {
+      title: m.example_sleep_title(noInputs, options),
+      description: m.example_sleep_description(noInputs, options),
+      focus: m.example_sleep_focus(noInputs, options),
+    },
+    "test-function": {
+      title: m.example_test_function_title(noInputs, options),
+      description: m.example_test_function_description(noInputs, options),
+      focus: m.example_test_function_focus(noInputs, options),
+    },
+    "generic-index": {
+      title: m.example_generic_index_title(noInputs, options),
+      description: m.example_generic_index_description(noInputs, options),
+      focus: m.example_generic_index_focus(noInputs, options),
+    },
   };
 
   return {
