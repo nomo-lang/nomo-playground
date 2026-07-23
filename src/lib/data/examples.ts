@@ -13,7 +13,7 @@ export const examples: Example[] = [
   {
     id: "hello",
     title: "Hello, Nomo",
-    description: "Functions, typed bindings, and standard output.",
+    description: "Inference, three-clause loops, and multi-value output.",
     focus: "Basics",
     source: `package app.main
 
@@ -24,8 +24,11 @@ fn greeting() -> string {
 }
 
 fn main() -> void {
-    let message: string = greeting()
-    io.println(message)
+    let message = greeting()
+
+    for let i: ui64 = 0; i < 10; i++ {
+        io.println(message, i)
+    }
 }
 `,
   },
