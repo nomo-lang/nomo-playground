@@ -36,7 +36,7 @@ const expectedOutputs: Record<ExampleId, string> = {
   ).join(""),
   arithmetic: "35\n-35\n",
   "struct-methods": "a@nomo.dev\n",
-  array: "array ok\n",
+  array: "1\n7\n2\n0\n",
   "game-of-life": ".....\n..#..\n..#..\n..#..\n.....\n",
   "fibonacci-closure": "0 1 1 2 3 5 8 13 21 34\n",
   "peano-integers": "5\n",
