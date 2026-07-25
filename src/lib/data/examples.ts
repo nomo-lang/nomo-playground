@@ -102,29 +102,25 @@ fn main() -> void {
   {
     id: "array",
     title: "Array values",
-    description: "Mutation, Option, match, and expression-oriented branches.",
-    focus: "Control flow",
-    upstreamPath: "array_basic",
+    description: "Inferred literals, nested indexing, and copy-on-write mutation.",
+    focus: "Collections",
+    upstreamPath: "collection_literals",
     source: `package app.main
 
 import std.array
 import std.io
+import std.num
 
 fn main() -> void {
-    let mut items: Array<i32> = Array.new<i32>()
-    items.push(1)
-    items.push(2)
-    items.set(0, 7)
-    let first: Option<i32> = items.get(0)
-    let message: string = match first {
-        Some(value) => if value == 7 {
-            "array ok"
-        } else {
-            "wrong"
-        }
-        None => "missing"
-    }
-    io.println(message)
+    let values = [1, 2, 3]
+    let mut matrix = [[1, 2], [3, 4]]
+    let snapshot = matrix
+    let empty: Array<i32> = []
+    matrix[0][1] = 7
+    io.println(num.to_string(values[0]))
+    io.println(num.to_string(matrix[0][1]))
+    io.println(num.to_string(snapshot[0][1]))
+    io.println(num.to_string(empty.len()))
 }
 `,
   },
