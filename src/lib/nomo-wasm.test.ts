@@ -129,11 +129,11 @@ describe("nomo WebAssembly artifact", () => {
   it("returns the production compiler diagnostic for invalid source", () => {
     const response = invoke(
       "check",
-      `package app.main
+      `package invalid_source
 
 import std.io
 
-fn main() -> void {
+fn main() {
     for let i ui64 = 0; i < 10; i++ {
         io.println("never")
     }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { defaultExample } from "./data/examples";
+import { defaultExample, examples } from "./data/examples";
 import {
   createShareUrl,
   decodeSource,
@@ -10,18 +10,26 @@ import {
 describe("formatter", () => {
   it("applies deterministic four-space indentation", () => {
     expect(
-      formatSource("package app.main\n\nfn main() -> void {\nio.println(\"ok\")\n}\n"),
+      formatSource("package hello_world\n\nfn main() {\nio.println(\"ok\")\n}\n"),
     ).toBe(
-      "package app.main\n\nfn main() -> void {\n    io.println(\"ok\")\n}\n",
+      "package hello_world\n\nfn main() {\n    io.println(\"ok\")\n}\n",
     );
   });
 
   it("does not treat braces inside strings as blocks", () => {
     expect(
       formatSource(
-        "package app.main\nfn main() -> void {\nio.println(\"{ ok }\")\n}\n",
+        "package hello_world\nfn main() {\nio.println(\"{ ok }\")\n}\n",
       ),
     ).toContain('    io.println("{ ok }")');
+  });
+});
+
+describe("canonical example syntax", () => {
+  it.each(examples)("keeps $id on manifest-root packages and implicit void", (example) => {
+    expect(example.source).toMatch(/^package [a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*\n/);
+    expect(example.source).not.toContain("package app.main");
+    expect(example.source).not.toMatch(/\bfn\s+\w+\([^)]*\)\s*->\s*void\b/);
   });
 });
 

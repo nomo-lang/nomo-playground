@@ -1,5 +1,5 @@
 export const NOMO_WASM_SHA256 =
-  "0bc3024e296220be964ae536a51bfcb13949addc67b50241c736167d410a09a2";
+  "7f418958310a41c3a64939a2f965ac676df90091b656d72e51b3119909ff7c37";
 
 export function nomoWasmAssetUrl(
   sha256 = NOMO_WASM_SHA256,
