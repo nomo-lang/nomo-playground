@@ -35,7 +35,7 @@ export const examples: Example[] = [
     description: "Inference, checked formatting, and three-clause loops.",
     focus: "Basics",
     upstreamPath: "hello",
-    source: `package app.main
+    source: `package hello
 
 import std.fmt
 import std.io
@@ -44,7 +44,7 @@ fn greeting() -> string {
     return "Hello, Nomo"
 }
 
-fn main() -> void {
+fn main() {
     let message = greeting()
 
     for let i: ui64 = 0; i < 10; i++ {
@@ -59,12 +59,12 @@ fn main() -> void {
     description: "Integer expressions, precedence, and conversion.",
     focus: "Values",
     upstreamPath: "operators_arithmetic",
-    source: `package app.main
+    source: `package arithmetic
 
 import std.io
 import std.num
 
-fn main() -> void {
+fn main() {
     let total: i64 = (12 + 6) * 2 - 9 / 3 % 2
     let negated: i64 = -total
     io.println(num.to_string(total))
@@ -78,7 +78,7 @@ fn main() -> void {
     description: "A typed record with an explicit implementation block.",
     focus: "Types",
     upstreamPath: "struct_methods",
-    source: `package app.main
+    source: `package struct_methods
 
 import std.io
 
@@ -92,7 +92,7 @@ impl User {
     }
 }
 
-fn main() -> void {
+fn main() {
     let user: User = User { email: "a@nomo.dev" }
     let email: string = user.get_email()
     io.println(email)
@@ -105,13 +105,13 @@ fn main() -> void {
     description: "Inferred literals, nested indexing, and copy-on-write mutation.",
     focus: "Collections",
     upstreamPath: "collection_literals",
-    source: `package app.main
+    source: `package collection_literals
 
 import std.array
 import std.io
 import std.num
 
-fn main() -> void {
+fn main() {
     let values = [1, 2, 3]
     let mut matrix = [[1, 2], [3, 4]]
     let snapshot = matrix
@@ -129,7 +129,7 @@ fn main() -> void {
     title: "Conway's Game of Life",
     description: "Evolves a five-by-five blinker with arrays and nested loops.",
     focus: "Simulation",
-    source: `package app.main
+    source: `package game_of_life
 
 import std.array
 import std.fmt
@@ -185,7 +185,7 @@ fn evolve(board: Array<i32>) -> Array<i32> {
     return next
 }
 
-fn render(board: Array<i32>) -> void {
+fn render(board: Array<i32>) {
     for let y: i64 = 0; y < 5; y++ {
         let mut row: string = ""
         for let x: i64 = 0; x < 5; x++ {
@@ -199,7 +199,7 @@ fn render(board: Array<i32>) -> void {
     }
 }
 
-fn main() -> void {
+fn main() {
     let mut board: Array<i32> = Array.new<i32>()
     for let index: i64 = 0; index < 25; index++ {
         let value: i32 = if index == 11 || index == 12 || index == 13 {
@@ -220,7 +220,7 @@ fn main() -> void {
       "Models captured closure state explicitly until first-class closures arrive.",
     focus: "State",
     upstreamPath: "mut_methods",
-    source: `package app.main
+    source: `package fibonacci_closure
 
 import std.fmt
 import std.io
@@ -240,7 +240,7 @@ impl Fibonacci {
     }
 }
 
-fn main() -> void {
+fn main() {
     let mut fibonacci: Fibonacci = Fibonacci { current: 0, next: 1 }
     let mut output: string = ""
     for let index: u64 = 0; index < 10; index++ {
@@ -260,7 +260,7 @@ fn main() -> void {
     title: "Peano Integers",
     description: "Builds addition from repeated successor operations.",
     focus: "Data model",
-    source: `package app.main
+    source: `package peano_integers
 
 import std.io
 
@@ -269,7 +269,7 @@ struct Peano {
 }
 
 impl Peano {
-    fn succ(mut self) -> void {
+    fn succ(mut self) {
         self.successors++
     }
 
@@ -286,7 +286,7 @@ fn add(left: Peano, right: Peano) -> Peano {
     return total
 }
 
-fn main() -> void {
+fn main() {
     let two: Peano = Peano { successors: 2 }
     let three: Peano = Peano { successors: 3 }
     let five: Peano = add(two, three)
@@ -301,7 +301,7 @@ fn main() -> void {
       "Uses deterministic worker partitions; each lane can become a native task later.",
     focus: "Work partitioning",
     upstreamPath: "operators_arithmetic",
-    source: `package app.main
+    source: `package concurrent_pi
 
 import std.fmt
 import std.io
@@ -320,7 +320,7 @@ fn partial_sum(worker: u64) -> f64 {
     return sum
 }
 
-fn main() -> void {
+fn main() {
     let mut total: f64 = 0.0
     for let worker: u64 = 0; worker < 4; worker++ {
         total += partial_sum(worker)
@@ -336,7 +336,7 @@ fn main() -> void {
       "Separates sieve stages into deterministic chunks suitable for future workers.",
     focus: "Algorithms",
     upstreamPath: "array_basic",
-    source: `package app.main
+    source: `package concurrent_prime_sieve
 
 import std.array
 import std.fmt
@@ -351,7 +351,7 @@ fn flag(values: Array<bool>, index: u64) -> bool {
     }
 }
 
-fn main() -> void {
+fn main() {
     let limit: u64 = 40
     let mut prime: Array<bool> = Array.new<bool>()
     for let index: u64 = 0; index <= 40; index++ {
@@ -389,7 +389,7 @@ fn main() -> void {
     description: "Backtracks over a compact one-dimensional solitaire board.",
     focus: "Search",
     upstreamPath: "array_value_semantics",
-    source: `package app.main
+    source: `package peg_solitaire
 
 import std.array
 import std.io
@@ -460,7 +460,7 @@ fn solve(board: Array<bool>, depth: i64, from: u64) -> i64 {
     }
 }
 
-fn main() -> void {
+fn main() {
     let mut board: Array<bool> = Array.new<bool>()
     board.push(false)
     board.push(true)
@@ -477,7 +477,7 @@ fn main() -> void {
     description: "Recursively compares trees stored behind Array boundaries.",
     focus: "Recursion",
     upstreamPath: "array_struct",
-    source: `package app.main
+    source: `package tree_comparison
 
 import std.array
 import std.io
@@ -538,7 +538,7 @@ fn same_tree(left: Tree, right: Tree) -> bool {
     return equal
 }
 
-fn main() -> void {
+fn main() {
     let left: Tree = branch(1, leaf(2), leaf(3))
     let same: Tree = branch(1, leaf(2), leaf(3))
     let different: Tree = branch(1, leaf(2), leaf(4))
@@ -554,18 +554,18 @@ fn main() -> void {
       "Uses a portable newline fallback because browser output is not a terminal.",
     focus: "Terminal",
     upstreamPath: "io_print",
-    source: `package app.main
+    source: `package clear_screen
 
 import std.io
 
-fn clear_screen() -> void {
+fn clear_screen() {
     // Native terminal backends can replace this with an ANSI-aware helper.
     for let line: u64 = 0; line < 8; line++ {
         io.println("")
     }
 }
 
-fn main() -> void {
+fn main() {
     io.println("old frame")
     clear_screen()
     io.println("new frame")
@@ -579,7 +579,7 @@ fn main() -> void {
       "Runs a pure request handler; native code can connect it to std.http.listen.",
     focus: "Server core",
     upstreamPath: "std_http",
-    source: `package app.main
+    source: `package http_server
 
 import std.fmt
 import std.io
@@ -608,7 +608,7 @@ fn handle(request: Request) -> Response {
     }
 }
 
-fn main() -> void {
+fn main() {
     // A native project feeds requests from http.accept into this handler.
     let request: Request = Request { method: "GET", path: "/hello" }
     io.println(handle(request))
@@ -621,12 +621,12 @@ fn main() -> void {
     description: "Renders a small monochrome image with Unicode block pixels.",
     focus: "Output",
     upstreamPath: "io_print",
-    source: `package app.main
+    source: `package display_image
 
 import std.array
 import std.io
 
-fn main() -> void {
+fn main() {
     let mut image: Array<string> = Array.new<string>()
     image.push("  ██  ██  ")
     image.push("██████████")
@@ -647,24 +647,24 @@ fn main() -> void {
       "Marks project file boundaries in one buffer; the CLI loads them as modules.",
     focus: "Project layout",
     upstreamPath: "workspace_basic",
-    source: `package app.main
+    source: `package multiple_files
 
 import std.io
 
 // src/math.nomo
-// package app.math
+// package multiple_files.math
 fn add(left: i64, right: i64) -> i64 {
     return left + right
 }
 
 // src/banner.nomo
-// package app.banner
+// package multiple_files.banner
 fn banner() -> string {
     return "multiple files"
 }
 
-// src/main.nomo would import app.math and app.banner.
-fn main() -> void {
+// src/main.nomo would import multiple_files.math and multiple_files.banner.
+fn main() {
     io.println(banner(), add(20, 22))
 }
 `,
@@ -676,11 +676,11 @@ fn main() -> void {
       "Shows deterministic scheduling; native code can replace ticks with time.sleep.",
     focus: "Timing",
     upstreamPath: "std_time",
-    source: `package app.main
+    source: `package sleep
 
 import std.io
 
-fn main() -> void {
+fn main() {
     // Browser WASM has no host clock. Native equivalent:
     // time.sleep_millis(250)
     for let remaining: i64 = 3; remaining > 0; remaining-- {
@@ -696,7 +696,7 @@ fn main() -> void {
     description: "Defines a #[test] and calls it in the sandbox demonstration.",
     focus: "Testing",
     upstreamPath: "nomo_test_basic",
-    source: `package app.main
+    source: `package test_function
 
 import std.io
 import std.testing
@@ -710,11 +710,11 @@ fn fibonacci(value: u64) -> u64 {
 }
 
 #[test]
-fn fibonacci_of_ten() -> void {
+fn fibonacci_of_ten() {
     testing.assert_equal(fibonacci(10), 55 as u64)
 }
 
-fn main() -> void {
+fn main() {
     fibonacci_of_ten()
     io.println("test passed; run all tests with nomo test")
 }
@@ -726,7 +726,7 @@ fn main() -> void {
     description: "Implements one bounds-checked index helper for every Array<T>.",
     focus: "Generics",
     upstreamPath: "generic_function",
-    source: `package app.main
+    source: `package generic_index
 
 import std.array
 import std.io
@@ -735,7 +735,7 @@ fn index<T>(values: Array<T>, position: u64) -> Option<T> {
     return values.get(position)
 }
 
-fn main() -> void {
+fn main() {
     let mut languages: Array<string> = Array.new<string>()
     languages.push("Nomo")
     languages.push("Rust")
